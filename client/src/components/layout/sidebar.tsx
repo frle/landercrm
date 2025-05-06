@@ -12,10 +12,15 @@ import {
   Menu,
   X,
   Settings,
-  User
+  User,
+  Tag,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 import { ProfileSettings } from "@/components/user/profile-settings";
-import { useState } from "react";
+import { CategoriesList } from "@/components/categories/categories-list";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 interface SidebarNavItem {
   title: string;
@@ -87,6 +92,11 @@ export function Sidebar() {
             </a>
           </Link>
         ))}
+        
+        {/* Add Categories component below landing pages */}
+        {(location === "/landing-pages" || location.includes("/landing-pages/category/")) && (
+          <CategoriesList />
+        )}
       </nav>
       
       {/* User profile section */}
@@ -166,6 +176,11 @@ export function Sidebar() {
                 </a>
               </Link>
             ))}
+            
+            {/* Add Categories component below landing pages for mobile */}
+            {(location === "/landing-pages" || location.includes("/landing-pages/category/")) && (
+              <CategoriesList />
+            )}
           </nav>
           <div className="px-4 py-3 mt-auto border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center">
