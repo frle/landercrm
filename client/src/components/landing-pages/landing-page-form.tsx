@@ -319,8 +319,10 @@ export function LandingPageForm({ isOpen, onClose, landingPage }: LandingPageFor
                         type="button"
                         variant="outline"
                         onClick={() => {
-                          setPreviewUrl(field.value);
-                          setUrlPreviewOpen(true);
+                          if (field.value) {
+                            setPreviewUrl(field.value);
+                            setUrlPreviewOpen(true);
+                          }
                         }}
                         className="whitespace-nowrap"
                       >
@@ -361,14 +363,18 @@ export function LandingPageForm({ isOpen, onClose, landingPage }: LandingPageFor
                   >
                     Close Preview
                   </Button>
-                  <Button 
-                    type="button"
-                    onClick={() => {
-                      window.open(previewUrl, '_blank');
-                    }}
-                  >
-                    Open in New Tab
-                  </Button>
+                  {previewUrl && (
+                    <Button 
+                      type="button"
+                      onClick={() => {
+                        if (previewUrl) {
+                          window.open(previewUrl, '_blank');
+                        }
+                      }}
+                    >
+                      Open in New Tab
+                    </Button>
+                  )}
                 </DialogFooter>
               </DialogContent>
             </Dialog>

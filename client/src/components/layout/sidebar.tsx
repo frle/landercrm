@@ -77,26 +77,34 @@ export function Sidebar() {
         <h1 className="text-xl font-bold text-primary">Landing Page CRM</h1>
       </div>
       <nav className="flex-1 px-2 mt-8 space-y-1">
-        {filteredNavItems.map((item) => (
-          <Link key={item.href} href={item.href}>
-            <a
-              className={cn(
-                "flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors",
-                location === item.href
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+        {filteredNavItems.map((item) => {
+          const isLandingPagesSection = item.href === "/landing-pages";
+          const isActive = location === item.href || 
+            (isLandingPagesSection && location.includes("/landing-pages/category/"));
+          
+          return (
+            <div key={item.href} className="space-y-1">
+              <Link href={item.href}>
+                <a
+                  className={cn(
+                    "flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors",
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  )}
+                >
+                  {item.icon}
+                  <span className="ml-3">{item.title}</span>
+                </a>
+              </Link>
+              
+              {/* Add Categories component below landing pages */}
+              {isLandingPagesSection && (
+                <CategoriesList />
               )}
-            >
-              {item.icon}
-              <span className="ml-3">{item.title}</span>
-            </a>
-          </Link>
-        ))}
-        
-        {/* Add Categories component below landing pages */}
-        {(location === "/landing-pages" || location.includes("/landing-pages/category/")) && (
-          <CategoriesList />
-        )}
+            </div>
+          );
+        })}
       </nav>
       
       {/* User profile section */}
@@ -160,27 +168,35 @@ export function Sidebar() {
             </button>
           </div>
           <nav className="flex-1 px-2 mt-4 space-y-1 overflow-y-auto">
-            {filteredNavItems.map((item) => (
-              <Link key={item.href} href={item.href}>
-                <a
-                  className={cn(
-                    "flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors",
-                    location === item.href
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            {filteredNavItems.map((item) => {
+              const isLandingPagesSection = item.href === "/landing-pages";
+              const isActive = location === item.href || 
+                (isLandingPagesSection && location.includes("/landing-pages/category/"));
+              
+              return (
+                <div key={item.href} className="space-y-1">
+                  <Link href={item.href}>
+                    <a
+                      className={cn(
+                        "flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors",
+                        isActive
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      )}
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {item.icon}
+                      <span className="ml-3">{item.title}</span>
+                    </a>
+                  </Link>
+                  
+                  {/* Add Categories component below landing pages */}
+                  {isLandingPagesSection && (
+                    <CategoriesList />
                   )}
-                  onClick={() => setIsOpen(false)}
-                >
-                  {item.icon}
-                  <span className="ml-3">{item.title}</span>
-                </a>
-              </Link>
-            ))}
-            
-            {/* Add Categories component below landing pages for mobile */}
-            {(location === "/landing-pages" || location.includes("/landing-pages/category/")) && (
-              <CategoriesList />
-            )}
+                </div>
+              );
+            })}
           </nav>
           <div className="px-4 py-3 mt-auto border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center">
