@@ -10,8 +10,11 @@ import {
   Users,
   LogOut,
   Menu,
-  X
+  X,
+  Settings,
+  User
 } from "lucide-react";
+import { ProfileSettings } from "@/components/user/profile-settings";
 import { useState } from "react";
 
 interface SidebarNavItem {
@@ -49,6 +52,7 @@ export function Sidebar() {
   const [location] = useLocation();
   const { user, logoutMutation } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const handleLogout = () => {
     logoutMutation.mutate();
@@ -86,13 +90,22 @@ export function Sidebar() {
       </nav>
       
       {/* User profile section */}
-      <div className="flex items-center px-4 py-3 mt-auto border-t border-gray-200 dark:border-gray-700">
-        <Avatar>
-          <AvatarFallback>{user ? getInitials(user.username) : "U"}</AvatarFallback>
-        </Avatar>
-        <div className="ml-3">
-          <p className="text-sm font-medium">{user?.username || "User"}</p>
-          <Button variant="link" size="sm" className="px-0 h-auto text-xs text-muted-foreground" onClick={handleLogout}>
+      <div className="px-4 py-3 mt-auto border-t border-gray-200 dark:border-gray-700">
+        <div className="flex items-center">
+          <Avatar>
+            <AvatarFallback>{user ? getInitials(user.username) : "U"}</AvatarFallback>
+          </Avatar>
+          <div className="ml-3 flex-1">
+            <p className="text-sm font-medium">{user?.username || "User"}</p>
+            <p className="text-xs text-muted-foreground capitalize">{user?.role || "User"}</p>
+          </div>
+          <Button variant="ghost" size="icon" onClick={() => setProfileOpen(true)} title="Profile Settings">
+            <Settings className="h-4 w-4" />
+          </Button>
+        </div>
+        <div className="mt-2 flex justify-end">
+          <Button variant="link" size="sm" className="text-xs text-muted-foreground" onClick={handleLogout}>
+            <LogOut className="h-3 w-3 mr-1" />
             Sign out
           </Button>
         </div>
@@ -154,19 +167,34 @@ export function Sidebar() {
               </Link>
             ))}
           </nav>
-          <div className="flex items-center px-4 py-3 mt-auto border-t border-gray-200 dark:border-gray-700">
-            <Avatar>
-              <AvatarFallback>{user ? getInitials(user.username) : "U"}</AvatarFallback>
-            </Avatar>
-            <div className="ml-3">
-              <p className="text-sm font-medium">{user?.username || "User"}</p>
-              <Button variant="link" size="sm" className="px-0 h-auto text-xs text-muted-foreground" onClick={handleLogout}>
+          <div className="px-4 py-3 mt-auto border-t border-gray-200 dark:border-gray-700">
+            <div className="flex items-center">
+              <Avatar>
+                <AvatarFallback>{user ? getInitials(user.username) : "U"}</AvatarFallback>
+              </Avatar>
+              <div className="ml-3 flex-1">
+                <p className="text-sm font-medium">{user?.username || "User"}</p>
+                <p className="text-xs text-muted-foreground capitalize">{user?.role || "User"}</p>
+              </div>
+              <Button variant="ghost" size="icon" onClick={() => {
+                setIsOpen(false);
+                setProfileOpen(true);
+              }} title="Profile Settings">
+                <Settings className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="mt-2 flex justify-end">
+              <Button variant="link" size="sm" className="text-xs text-muted-foreground" onClick={handleLogout}>
+                <LogOut className="h-3 w-3 mr-1" />
                 Sign out
               </Button>
             </div>
           </div>
         </div>
       )}
+      
+      {/* Profile settings dialog */}
+      <ProfileSettings open={profileOpen} onOpenChange={setProfileOpen} />
     </>
   );
 }
