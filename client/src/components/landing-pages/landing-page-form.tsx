@@ -190,7 +190,7 @@ export function LandingPageForm({ isOpen, onClose, landingPage }: LandingPageFor
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEditing ? "Edit Landing Page" : "Add New Landing Page"}</DialogTitle>
           <DialogDescription>
@@ -227,6 +227,7 @@ export function LandingPageForm({ isOpen, onClose, landingPage }: LandingPageFor
                       placeholder="Brief description of the landing page..." 
                       rows={3}
                       {...field} 
+                      value={field.value || ""}
                     />
                   </FormControl>
                   <FormMessage />
@@ -271,7 +272,8 @@ export function LandingPageForm({ isOpen, onClose, landingPage }: LandingPageFor
                   <FormControl>
                     <Input 
                       placeholder="E.g. Lose Weight Fast With Our Program!" 
-                      {...field} 
+                      {...field}
+                      value={field.value || ""} 
                     />
                   </FormControl>
                   <FormMessage />
@@ -288,7 +290,8 @@ export function LandingPageForm({ isOpen, onClose, landingPage }: LandingPageFor
                   <FormControl>
                     <Input 
                       placeholder="https://example.com/landing-page" 
-                      {...field} 
+                      {...field}
+                      value={field.value || ""} 
                     />
                   </FormControl>
                   <FormMessage />
@@ -347,7 +350,8 @@ export function LandingPageForm({ isOpen, onClose, landingPage }: LandingPageFor
                   <FormControl>
                     <Input 
                       placeholder="https://example.com/landing-template.zip" 
-                      {...field} 
+                      {...field}
+                      value={field.value || ""}
                     />
                   </FormControl>
                   <FormMessage />

@@ -175,9 +175,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     { name: "screenshot", maxCount: 1 }
   ]), async (req, res) => {
     try {
-      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] } || {};
       
-      const screenshotFile = files.screenshot?.[0];
+      const screenshotFile = files?.screenshot?.[0];
       
       // Parse and validate the request body
       const landingPageData = insertLandingPageSchema.parse({
@@ -210,7 +210,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   ]), async (req, res) => {
     try {
       const id = Number(req.params.id);
-      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] } || {};
       
       const existingLandingPage = await storage.getLandingPage(id);
       if (!existingLandingPage) {
