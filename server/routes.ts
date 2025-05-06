@@ -109,12 +109,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/categories", async (req, res) => {
     try {
       const categories = await storage.getAllCategories();
-      res.json(categories);
+      
+      // Count landing pages for each category
+      const categoriesWithCounts = await Promise.all(categories.map(async (category) => {
+        const { landingPages } = await storage.getAllLandingPages({ 
+          categoryId: category.id
+        });
+        return {
+          ...category,
+          pageCount: landingPages.length
+        };
+      }));
+      
+      res.json(categoriesWithCounts);
     } catch (err) {
       handleError(err, res);
     }
   });
-
+  
   app.post("/api/categories", requireRole("admin"), async (req, res) => {
     try {
       const categoryData = insertCategorySchema.parse(req.body);

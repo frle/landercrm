@@ -18,6 +18,7 @@ function Router() {
     <Switch>
       <ProtectedRoute path="/" component={HomePage} />
       <ProtectedRoute path="/landing-pages" component={LandingPagesPage} />
+      <ProtectedRoute path="/landing-pages/category/:id" component={LandingPagesPage} />
       <ProtectedRoute path="/domain-manager" component={DomainManagerPage} />
       <ProtectedRoute path="/user-management" component={UserManagementPage} />
       <Route path="/auth" component={AuthPage} />

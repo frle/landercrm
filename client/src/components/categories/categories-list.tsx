@@ -4,6 +4,11 @@ import { useLocation, Link } from "wouter";
 import { Tag, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Category } from "@shared/schema";
+
+// Define an extended category type that includes the page count property
+interface CategoryWithCount extends Category {
+  pageCount?: number;
+}
 import { CategoryForm } from "./category-form";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/use-auth";
@@ -14,7 +19,7 @@ export function CategoriesList() {
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
 
-  const { data: categories = [] } = useQuery<Category[]>({
+  const { data: categories = [] } = useQuery<CategoryWithCount[]>({
     queryKey: ["/api/categories"],
   });
 
