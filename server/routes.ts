@@ -349,8 +349,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/dashboard/recent-activity", async (req, res) => {
     try {
-      // Filter activities for basic users to only show landing page creations
+      // Get user role - default to basic if not authenticated
       const userRole = req.user?.role || 'basic';
+      
+      // Only filter for basic users, admins see everything
       const filterLandingPageOnly = userRole !== 'admin';
       
       const activities = await storage.getRecentActivity(5, userRole, filterLandingPageOnly);
@@ -362,8 +364,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.get("/api/dashboard/all-activity", async (req, res) => {
     try {
-      // Filter activities for basic users to only show landing page creations
+      // Get user role - default to basic if not authenticated
       const userRole = req.user?.role || 'basic';
+      
+      // Only filter for basic users, admins see everything
       const filterLandingPageOnly = userRole !== 'admin';
       
       const activities = await storage.getAllActivity(userRole, filterLandingPageOnly);
