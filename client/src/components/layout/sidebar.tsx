@@ -43,7 +43,8 @@ const navItems: SidebarNavItem[] = [
   {
     title: "Domain Manager",
     href: "/domain-manager",
-    icon: <Globe className="h-5 w-5" />
+    icon: <Globe className="h-5 w-5" />,
+    adminOnly: true
   },
   {
     title: "User Management",
