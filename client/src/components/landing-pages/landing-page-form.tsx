@@ -24,7 +24,6 @@ interface LandingPageFormProps {
 const formSchema = insertLandingPageSchema.extend({
   id: z.number().optional(),
   screenshotFile: z.instanceof(File).optional().nullable(),
-  zipFile: z.instanceof(File).optional().nullable(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -48,8 +47,8 @@ export function LandingPageForm({ isOpen, onClose, landingPage }: LandingPageFor
       categoryId: landingPage?.categoryId || null,
       mainHeadline: landingPage?.mainHeadline || "",
       liveUrl: landingPage?.liveUrl || "",
+      zipFileUrl: landingPage?.zipFileUrl || "",
       screenshotFile: null,
-      zipFile: null,
     },
   });
 
@@ -62,8 +61,8 @@ export function LandingPageForm({ isOpen, onClose, landingPage }: LandingPageFor
         categoryId: landingPage.categoryId,
         mainHeadline: landingPage.mainHeadline || "",
         liveUrl: landingPage.liveUrl || "",
+        zipFileUrl: landingPage.zipFileUrl || "",
         screenshotFile: null,
-        zipFile: null,
       });
       
       // Show existing screenshot preview if available
@@ -77,8 +76,8 @@ export function LandingPageForm({ isOpen, onClose, landingPage }: LandingPageFor
         categoryId: null,
         mainHeadline: "",
         liveUrl: "",
+        zipFileUrl: "",
         screenshotFile: null,
-        zipFile: null,
       });
       setScreenshotPreview(null);
     }
@@ -97,13 +96,7 @@ export function LandingPageForm({ isOpen, onClose, landingPage }: LandingPageFor
     }
   };
 
-  // Handle zip file change
-  const handleZipFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      form.setValue("zipFile", file);
-    }
-  };
+  // This function is no longer needed as we're using a URL field
 
   // Create landing page mutation
   const createMutation = useMutation({
@@ -179,13 +172,13 @@ export function LandingPageForm({ isOpen, onClose, landingPage }: LandingPageFor
       formData.append("liveUrl", values.liveUrl);
     }
     
+    if (values.zipFileUrl) {
+      formData.append("zipFileUrl", values.zipFileUrl);
+    }
+    
     // Add files
     if (values.screenshotFile) {
       formData.append("screenshot", values.screenshotFile);
-    }
-    
-    if (values.zipFile) {
-      formData.append("zipFile", values.zipFile);
     }
     
     if (isEditing && landingPage) {
@@ -345,34 +338,25 @@ export function LandingPageForm({ isOpen, onClose, landingPage }: LandingPageFor
               </div>
             </div>
             
-            <div className="space-y-2">
-              <Label>ZIP File</Label>
-              <div className="mt-1 flex justify-center rounded-md border-2 border-dashed border-input px-6 py-4">
-                <div className="space-y-1 text-center">
-                  <CloudUpload className="mx-auto h-12 w-12 text-muted-foreground" />
-                  <div className="flex text-sm">
-                    <label
-                      htmlFor="zip-upload"
-                      className="relative cursor-pointer font-medium text-primary hover:text-primary/80"
-                    >
-                      <span>Upload a ZIP file</span>
-                      <input
-                        id="zip-upload"
-                        name="zip-upload"
-                        type="file"
-                        className="sr-only"
-                        accept=".zip,.rar,.7zip"
-                        onChange={handleZipFileChange}
-                      />
-                    </label>
-                    <p className="pl-1 text-muted-foreground">or drag and drop</p>
-                  </div>
+            <FormField
+              control={form.control}
+              name="zipFileUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>ZIP File URL</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="https://example.com/landing-template.zip" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
                   <p className="text-xs text-muted-foreground">
-                    {form.watch("zipFile")?.name || "ZIP files up to 50MB"}
+                    Enter a URL to a hosted ZIP file containing the landing page template
                   </p>
-                </div>
-              </div>
-            </div>
+                </FormItem>
+              )}
+            />
             
             <DialogFooter>
               <Button 
