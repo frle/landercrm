@@ -153,7 +153,11 @@ export function LandingPageTable({ landingPages, categories, onView, onEdit, onR
               </TableRow>
             ) : (
               landingPages.map((landingPage) => (
-                <TableRow key={landingPage.id}>
+                <TableRow 
+                  key={landingPage.id} 
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => onView(landingPage.id)}
+                >
                   <TableCell>
                     <div className="flex items-center space-x-3">
                       <div className="h-10 w-10 flex-shrink-0 overflow-hidden rounded-md">
@@ -187,18 +191,31 @@ export function LandingPageTable({ landingPages, categories, onView, onEdit, onR
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={(e) => {
+                            // Stop the click event from propagating to the table row
+                            e.stopPropagation();
+                          }}
+                        >
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onView(landingPage.id)}>
+                        <DropdownMenuItem onClick={(e) => {
+                          e.stopPropagation();
+                          onView(landingPage.id);
+                        }}>
                           <Eye className="mr-2 h-4 w-4" />
                           View
                         </DropdownMenuItem>
                         {landingPage.zipFileUrl && (
                           <DropdownMenuItem 
-                            onClick={() => downloadMutation.mutate(landingPage.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              downloadMutation.mutate(landingPage.id);
+                            }}
                             disabled={downloadMutation.isPending}
                           >
                             <Download className="mr-2 h-4 w-4" />
@@ -207,12 +224,18 @@ export function LandingPageTable({ landingPages, categories, onView, onEdit, onR
                         )}
                         {isAdmin && (
                           <>
-                            <DropdownMenuItem onClick={() => onEdit(landingPage)}>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation(); 
+                              onEdit(landingPage);
+                            }}>
                               <Edit className="mr-2 h-4 w-4" />
                               Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem 
-                              onClick={() => handleDelete(landingPage)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(landingPage);
+                              }}
                               className="text-destructive focus:text-destructive"
                             >
                               <Trash className="mr-2 h-4 w-4" />
