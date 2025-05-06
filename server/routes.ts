@@ -172,14 +172,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/landing-pages", requireRole("admin"), upload.fields([
-    { name: "screenshot", maxCount: 1 },
-    { name: "zipFile", maxCount: 1 }
+    { name: "screenshot", maxCount: 1 }
   ]), async (req, res) => {
     try {
       const files = req.files as { [fieldname: string]: Express.Multer.File[] };
       
       const screenshotFile = files.screenshot?.[0];
-      const zipFile = files.zipFile?.[0];
       
       // Parse and validate the request body
       const landingPageData = insertLandingPageSchema.parse({
@@ -187,7 +185,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         categoryId: req.body.categoryId ? Number(req.body.categoryId) : null,
         createdBy: req.user!.id,
         screenshotUrl: screenshotFile ? `/uploads/screenshots/${screenshotFile.filename}` : null,
-        zipFileUrl: zipFile ? `/uploads/zip-files/${zipFile.filename}` : null
+        zipFileUrl: req.body.zipFileUrl || null
       });
       
       const landingPage = await storage.createLandingPage(landingPageData);
@@ -208,8 +206,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.put("/api/landing-pages/:id", requireRole("admin"), upload.fields([
-    { name: "screenshot", maxCount: 1 },
-    { name: "zipFile", maxCount: 1 }
+    { name: "screenshot", maxCount: 1 }
   ]), async (req, res) => {
     try {
       const id = Number(req.params.id);
@@ -221,7 +218,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const screenshotFile = files.screenshot?.[0];
-      const zipFile = files.zipFile?.[0];
       
       const updateData: any = {
         ...req.body,
@@ -232,8 +228,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updateData.screenshotUrl = `/uploads/screenshots/${screenshotFile.filename}`;
       }
       
-      if (zipFile) {
-        updateData.zipFileUrl = `/uploads/zip-files/${zipFile.filename}`;
+      // If zipFileUrl is provided in the form, use it directly
+      if (req.body.zipFileUrl) {
+        updateData.zipFileUrl = req.body.zipFileUrl;
       }
       
       const updatedLandingPage = await storage.updateLandingPage(id, updateData);
@@ -274,20 +271,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           details: `Deleted landing page: ${landingPage.name}`
         });
         
-        // Delete associated files
-        if (landingPage.screenshotUrl) {
+        // Delete associated screenshot file if it's local
+        if (landingPage.screenshotUrl && landingPage.screenshotUrl.startsWith('/uploads/')) {
           const screenshotPath = path.join(process.cwd(), landingPage.screenshotUrl);
           if (fs.existsSync(screenshotPath)) {
             fs.unlinkSync(screenshotPath);
           }
         }
         
-        if (landingPage.zipFileUrl) {
-          const zipPath = path.join(process.cwd(), landingPage.zipFileUrl);
-          if (fs.existsSync(zipPath)) {
-            fs.unlinkSync(zipPath);
-          }
-        }
+        // We don't need to delete ZIP files since they're now external URLs
         
         res.status(204).end();
       } else {

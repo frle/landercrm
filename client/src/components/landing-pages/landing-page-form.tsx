@@ -176,7 +176,7 @@ export function LandingPageForm({ isOpen, onClose, landingPage }: LandingPageFor
       formData.append("zipFileUrl", values.zipFileUrl);
     }
     
-    // Add files
+    // Add screenshot file if selected
     if (values.screenshotFile) {
       formData.append("screenshot", values.screenshotFile);
     }
