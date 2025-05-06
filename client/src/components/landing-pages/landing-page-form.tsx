@@ -12,7 +12,7 @@ import { z } from "zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { CloudUpload } from "lucide-react";
+import { CloudUpload, ExternalLink } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 interface LandingPageFormProps {
@@ -31,6 +31,8 @@ type FormValues = z.infer<typeof formSchema>;
 export function LandingPageForm({ isOpen, onClose, landingPage }: LandingPageFormProps) {
   const { toast } = useToast();
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
+  const [urlPreviewOpen, setUrlPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const isEditing = !!landingPage;
 
   // Fetch categories
@@ -304,17 +306,72 @@ export function LandingPageForm({ isOpen, onClose, landingPage }: LandingPageFor
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Live URL</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="https://example.com/landing-page" 
-                      {...field}
-                      value={field.value || ""} 
-                    />
-                  </FormControl>
+                  <div className="flex gap-2">
+                    <FormControl className="flex-1">
+                      <Input 
+                        placeholder="https://example.com/landing-page" 
+                        {...field}
+                        value={field.value || ""} 
+                      />
+                    </FormControl>
+                    {field.value && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setPreviewUrl(field.value);
+                          setUrlPreviewOpen(true);
+                        }}
+                        className="whitespace-nowrap"
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Preview
+                      </Button>
+                    )}
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            
+            {/* URL Preview Dialog */}
+            <Dialog open={urlPreviewOpen} onOpenChange={setUrlPreviewOpen}>
+              <DialogContent className="sm:max-w-4xl max-h-[90vh]">
+                <DialogHeader>
+                  <DialogTitle>Live Page Preview</DialogTitle>
+                  <DialogDescription>
+                    Previewing: {previewUrl}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="aspect-video w-full border rounded-md overflow-hidden">
+                  {previewUrl && (
+                    <iframe 
+                      src={previewUrl}
+                      className="w-full h-full"
+                      title="Landing Page Preview"
+                      sandbox="allow-scripts allow-same-origin"
+                    />
+                  )}
+                </div>
+                <DialogFooter>
+                  <Button 
+                    type="button" 
+                    variant="outline"
+                    onClick={() => setUrlPreviewOpen(false)}
+                  >
+                    Close Preview
+                  </Button>
+                  <Button 
+                    type="button"
+                    onClick={() => {
+                      window.open(previewUrl, '_blank');
+                    }}
+                  >
+                    Open in New Tab
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
             
             <div className="space-y-2">
               <Label>Screenshot</Label>

@@ -26,6 +26,16 @@ export default function LandingPagesPage() {
   const [viewLandingPageId, setViewLandingPageId] = useState<number | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   
+  // Check if we're on a category page
+  const [match, params] = useRoute<{ id: string }>("/landing-pages/category/:id");
+  
+  // Set category filter from URL parameter when component mounts or URL changes
+  useEffect(() => {
+    if (match && params.id) {
+      setCategoryFilter(params.id);
+    }
+  }, [match, params]);
+  
   const limit = 10; // Items per page
 
   // Fetch categories
@@ -121,8 +131,14 @@ export default function LandingPagesPage() {
         <div className="py-6 px-4 sm:px-6 lg:px-8">
           {/* Page header */}
           <Header 
-            title="Landing Pages" 
-            description="Manage all your landing page templates in one place."
+            title={match && params.id !== "all" 
+              ? `${getCategoryName(Number(params.id))} Landing Pages`
+              : "Landing Pages"
+            }
+            description={match && params.id !== "all"
+              ? `Viewing landing pages in the ${getCategoryName(Number(params.id))} category.`
+              : "Manage all your landing page templates in one place."
+            }
             action={{
               label: "Add Landing Page",
               icon: <Plus className="h-4 w-4 mr-2" />,
