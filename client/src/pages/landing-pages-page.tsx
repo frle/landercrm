@@ -4,7 +4,7 @@ import { Header } from "@/components/layout/header";
 import { LandingPageTable } from "@/components/landing-pages/landing-page-table";
 import { LandingPageForm } from "@/components/landing-pages/landing-page-form";
 import { LandingPage, Category } from "@shared/schema";
-import { Plus, Search, Filter } from "lucide-react";
+import { Plus, Search, Filter, Download } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -17,8 +17,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function LandingPagesPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [dateFilter, setDateFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [formOpen, setFormOpen] = useState(false);
   const [landingPageToEdit, setLandingPageToEdit] = useState<LandingPage | undefined>(undefined);
@@ -38,8 +38,8 @@ export default function LandingPagesPage() {
     queryFn: async () => {
       const searchParams = new URLSearchParams();
       if (searchTerm) searchParams.append("search", searchTerm);
-      if (categoryFilter) searchParams.append("category", categoryFilter);
-      if (dateFilter) searchParams.append("date", dateFilter);
+      if (categoryFilter && categoryFilter !== "all") searchParams.append("category", categoryFilter);
+      if (dateFilter && dateFilter !== "all") searchParams.append("date", dateFilter);
       searchParams.append("page", currentPage.toString());
       searchParams.append("limit", limit.toString());
       
@@ -154,7 +154,7 @@ export default function LandingPagesPage() {
                       <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Categories</SelectItem>
+                      <SelectItem value="all">All Categories</SelectItem>
                       {categories.map((category) => (
                         <SelectItem key={category.id} value={category.id.toString()}>
                           {category.name}
@@ -171,7 +171,7 @@ export default function LandingPagesPage() {
                       <SelectValue placeholder="All Time" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Time</SelectItem>
+                      <SelectItem value="all">All Time</SelectItem>
                       <SelectItem value="today">Today</SelectItem>
                       <SelectItem value="week">This Week</SelectItem>
                       <SelectItem value="month">This Month</SelectItem>
@@ -350,7 +350,7 @@ export default function LandingPagesPage() {
                       document.body.removeChild(link);
                     });
                   }}>
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Download className="h-4 w-4 mr-2" />
                     Download Template
                   </Button>
                 )}
