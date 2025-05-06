@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useLocation, useRoute } from "wouter";
+import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { insertUserSchema } from "@shared/schema";
 import { Loader2 } from "lucide-react";
 
@@ -58,7 +59,7 @@ export default function AuthPage() {
       email: "",
       password: "",
       confirmPassword: "",
-      role: "basic", // Default role
+      role: "basic", // Default role - all users are registered as basic users
     },
   });
 
@@ -201,6 +202,7 @@ export default function AuthPage() {
                         </FormItem>
                       )}
                     />
+
                     <Button 
                       type="submit" 
                       className="w-full"
