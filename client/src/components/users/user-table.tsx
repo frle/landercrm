@@ -42,9 +42,11 @@ export function UserTable({ users, onEdit }: UserTableProps) {
   const { toast } = useToast();
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
   const [userToDeactivate, setUserToDeactivate] = useState<User | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
   
   // Format date
-  const formatDate = (date: Date | string | undefined) => {
+  const formatDate = (date: Date | string | null | undefined) => {
     if (!date) return "Never";
     return formatDistanceToNow(new Date(date), { addSuffix: true });
   };
@@ -84,11 +86,46 @@ export function UserTable({ users, onEdit }: UserTableProps) {
     setDeactivateDialogOpen(true);
   };
   
+  // Delete user mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (userId: number) => {
+      await apiRequest("DELETE", `/api/users/${userId}`);
+      return userId;
+    },
+    onSuccess: () => {
+      toast({
+        title: "User deleted",
+        description: "User has been permanently removed from the system."
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+      setUserToDelete(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Delete failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+  
   const confirmDeactivate = () => {
     if (userToDeactivate) {
       deactivateMutation.mutate(userToDeactivate.id);
     }
     setDeactivateDialogOpen(false);
+  };
+  
+  const handleDelete = (user: User) => {
+    setUserToDelete(user);
+    setDeleteDialogOpen(true);
+  };
+  
+  const confirmDelete = () => {
+    if (userToDelete) {
+      deleteMutation.mutate(userToDelete.id);
+    }
+    setDeleteDialogOpen(false);
   };
 
   return (
@@ -149,6 +186,16 @@ export function UserTable({ users, onEdit }: UserTableProps) {
                             Change to Basic User
                           </DropdownMenuItem>
                         )}
+                        {/* Don't allow deleting admin user with ID 1 */}
+                        {user.id !== 1 && (
+                          <DropdownMenuItem 
+                            onClick={() => handleDelete(user)}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash className="mr-2 h-4 w-4" />
+                            Delete User
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -172,6 +219,27 @@ export function UserTable({ users, onEdit }: UserTableProps) {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDeactivate}>
               Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete user?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the user <strong>{userToDelete?.username}</strong> from the system.
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
