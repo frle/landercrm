@@ -1,0 +1,91 @@
+📝 Product Requirements Document (PRD)
+
+Project Title:
+Landing Page Library CRM
+
+Purpose:
+Build a web-based internal CRM system where admins can manage a repository of categorized landing pages, including screenshots, descriptions, and downloadable .zip files. Users can browse and download pages, and the system includes role-based access, mass domain editing, and basic audit features.
+
+🧩 Key Features
+
+1. Landing Page Record Management
+Fields:
+Name
+Description
+Category (e.g., diet, debt, mortgage, etc.)
+Main headline
+Live URL
+Screenshot (image upload)
+ZIP file download link (manual or generated)
+Date added, last modified
+Admin Features:
+Create / Read / Update / Delete (CRUD)
+Upload screenshots
+Upload ZIP files
+Edit or delete any record
+User Features:
+View records
+Download ZIP files
+2. Authentication & Authorization
+Roles:
+Admin (full access)
+Basic User (view & download only)
+Admin can register new users
+Optional: Password reset via email (MVP can skip)
+3. Mass Domain Replace Utility
+Admin-only feature
+Function to:
+Input old domain (e.g., olddomain.com)
+Input new domain (e.g., newdomain.com)
+Replace all matching URLs and ZIP links in records
+Optional preview mode
+Log change history
+4. Search & Filtering
+Filter by:
+Category
+Headline keyword
+Date added
+Free-text search (name, headline, description)
+5. File Hosting
+Screenshots and ZIP files:
+Stored in Replit storage or via cloud (e.g., S3)
+Direct links saved in DB
+Download count tracked (optional)
+6. User Interface
+Admin Dashboard:
+Table of landing pages with edit/delete options
+Mass domain replace tool
+User management (register new users)
+Basic User View:
+Read-only landing page browser
+Download buttons for ZIPs
+Responsive, clean layout using Tailwind CSS
+7. AI Agent Enhancement (Optional)
+Use Replit AI Agent to:
+
+Auto-generate short summaries of landing pages based on headline & description
+Suggest better categories/tags based on input text
+Validate URLs (check if live or broken)
+🧱 Tech Stack
+
+
+Layer	Technology
+Frontend	React + Tailwind (or Replit Templates)
+Backend	Node.js (Express or Next.js)
+Auth	Replit Auth or custom JWT-based
+DB	PostgreSQL (via Replit DB or external)
+File Storage	Replit Filesystem (MVP), or external (S3)
+Screenshot Tool	Manual upload or future Puppeteer integration
+AI Features	Replit AI Agent APIs or OpenAI API
+🔐 Security Requirements
+
+Secure file uploads
+Role-based route protection
+Rate limiting for download endpoints (optional)
+✅ Success Criteria
+
+Admins can manage and categorize landing pages
+Users can view and download landing pages
+URLs can be mass-edited by domain
+Auth is secure and stable
+AI Agent integrations are helpful but not mandatory at MVP
