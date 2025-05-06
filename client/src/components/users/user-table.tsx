@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User } from "@shared/schema";
 import { formatDistanceToNow } from "date-fns";
-import { Edit, MoreVertical, UserX, User as UserIcon } from "lucide-react";
+import { Edit, MoreVertical, UserX, Trash, User as UserIcon } from "lucide-react";
 import { 
   AlertDialog,
   AlertDialogAction,

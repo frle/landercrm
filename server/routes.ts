@@ -464,6 +464,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       handleError(err, res);
     }
   });
+  
+  app.delete("/api/users/:id", requireRole("admin"), async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      
+      // Don't allow deleting the admin user
+      if (id === 1) {
+        return res.status(403).json({ message: "Cannot delete admin user" });
+      }
+      
+      // Don't allow deleting yourself
+      if (id === req.user!.id) {
+        return res.status(403).json({ message: "Cannot delete your own account" });
+      }
+      
+      // Get user before deletion for logging
+      const user = await storage.getUser(id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const success = await storage.deleteUser(id);
+      
+      if (success) {
+        // Log user deletion
+        await storage.logActivity({
+          userId: req.user!.id,
+          action: "delete",
+          entityType: "user",
+          entityId: id,
+          details: `Deleted user: ${user.username}`
+        });
+        
+        res.status(204).end();
+      } else {
+        res.status(500).json({ message: "Failed to delete user" });
+      }
+    } catch (err) {
+      handleError(err, res);
+    }
+  });
 
   // Serve uploaded files
   app.use("/uploads", (req, res, next) => {

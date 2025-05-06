@@ -13,6 +13,7 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   getAllUsers(): Promise<User[]>;
   updateUser(id: number, data: Partial<User>): Promise<User | undefined>;
+  deleteUser(id: number): Promise<boolean>;
   
   // Category methods
   getCategory(id: number): Promise<Category | undefined>;
@@ -105,6 +106,19 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return updatedUser || undefined;
+  }
+  
+  async deleteUser(id: number): Promise<boolean> {
+    // Don't allow deleting the admin user (id 1)
+    if (id === 1) {
+      return false;
+    }
+    
+    const result = await db
+      .delete(users)
+      .where(eq(users.id, id))
+      .returning({ id: users.id });
+    return result.length > 0;
   }
 
   // Category methods
