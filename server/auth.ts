@@ -75,10 +75,19 @@ export function setupAuth(app: Express) {
       password: await hashPassword(req.body.password),
     });
 
-    req.login(user, (err) => {
-      if (err) return next(err);
+    // Check if this is a self-registration (not logged in) or admin creating a user
+    const isAdminCreatingUser = req.isAuthenticated() && req.user?.role === 'admin';
+    
+    if (isAdminCreatingUser) {
+      // Admin is creating a user, don't log in as the new user
       res.status(201).json(user);
-    });
+    } else {
+      // Self-registration, log in as the new user
+      req.login(user, (err) => {
+        if (err) return next(err);
+        res.status(201).json(user);
+      });
+    }
   });
 
   app.post("/api/login", passport.authenticate("local"), (req, res) => {
