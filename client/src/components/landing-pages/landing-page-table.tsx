@@ -57,7 +57,8 @@ export function LandingPageTable({ landingPages, categories, onView, onEdit, onR
   };
   
   // Format date
-  const formatDate = (date: Date | string) => {
+  const formatDate = (date: Date | string | null) => {
+    if (!date) return "Unknown";
     return formatDistanceToNow(new Date(date), { addSuffix: true });
   };
   
