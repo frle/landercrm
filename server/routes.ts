@@ -178,6 +178,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const files = req.files as { [fieldname: string]: Express.Multer.File[] } || {};
       
       const screenshotFile = files?.screenshot?.[0];
+
+      console.log("Request body:", req.body);
       
       // Parse and validate the request body
       const landingPageData = insertLandingPageSchema.parse({

@@ -100,7 +100,7 @@ export function LandingPageForm({ isOpen, onClose, landingPage }: LandingPageFor
 
   // Create landing page mutation
   const createMutation = useMutation({
-    mutationFn: async (data: FormData) => {
+    mutationFn: async (data: FormData | Record<string, any>) => {
       const res = await apiRequest("POST", "/api/landing-pages", data);
       return await res.json();
     },
@@ -126,7 +126,7 @@ export function LandingPageForm({ isOpen, onClose, landingPage }: LandingPageFor
 
   // Update landing page mutation
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: FormData }) => {
+    mutationFn: async ({ id, data }: { id: number; data: FormData | Record<string, any> }) => {
       const res = await apiRequest("PUT", `/api/landing-pages/${id}`, data);
       return await res.json();
     },
@@ -151,40 +151,57 @@ export function LandingPageForm({ isOpen, onClose, landingPage }: LandingPageFor
 
   // Handle form submission
   const onSubmit = (values: FormValues) => {
-    const formData = new FormData();
-    
-    // Add text fields
-    formData.append("name", values.name);
-    
-    if (values.description) {
-      formData.append("description", values.description);
-    }
-    
-    if (values.categoryId !== null) {
-      formData.append("categoryId", String(values.categoryId));
-    }
-    
-    if (values.mainHeadline) {
-      formData.append("mainHeadline", values.mainHeadline);
-    }
-    
-    if (values.liveUrl) {
-      formData.append("liveUrl", values.liveUrl);
-    }
-    
-    if (values.zipFileUrl) {
-      formData.append("zipFileUrl", values.zipFileUrl);
-    }
-    
-    // Add screenshot file if selected
+    // If there's a screenshot file, use FormData
     if (values.screenshotFile) {
+      const formData = new FormData();
+      
+      // Add text fields
+      formData.append("name", values.name);
+      
+      if (values.description) {
+        formData.append("description", values.description);
+      }
+      
+      if (values.categoryId !== null) {
+        formData.append("categoryId", String(values.categoryId));
+      }
+      
+      if (values.mainHeadline) {
+        formData.append("mainHeadline", values.mainHeadline);
+      }
+      
+      if (values.liveUrl) {
+        formData.append("liveUrl", values.liveUrl);
+      }
+      
+      if (values.zipFileUrl) {
+        formData.append("zipFileUrl", values.zipFileUrl);
+      }
+      
+      // Add screenshot file
       formData.append("screenshot", values.screenshotFile);
-    }
-    
-    if (isEditing && landingPage) {
-      updateMutation.mutate({ id: landingPage.id, data: formData });
+      
+      if (isEditing && landingPage) {
+        updateMutation.mutate({ id: landingPage.id, data: formData });
+      } else {
+        createMutation.mutate(formData);
+      }
     } else {
-      createMutation.mutate(formData);
+      // If no screenshot file, use regular JSON
+      const jsonData = {
+        name: values.name,
+        description: values.description || "",
+        categoryId: values.categoryId,
+        mainHeadline: values.mainHeadline || "",
+        liveUrl: values.liveUrl || "",
+        zipFileUrl: values.zipFileUrl || ""
+      };
+      
+      if (isEditing && landingPage) {
+        updateMutation.mutate({ id: landingPage.id, data: jsonData });
+      } else {
+        createMutation.mutate(jsonData);
+      }
     }
   };
 
