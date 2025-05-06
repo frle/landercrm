@@ -376,44 +376,53 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getRecentActivity(limit = 5, userRole?: string, filterLandingPageOnly = false): Promise<any[]> {
-    let query = db.query.activityLogs.findMany({
-      limit,
-      orderBy: desc(activityLogs.createdAt),
-      with: {
-        user: true
-      }
-    });
-    
-    // If user is basic and we need to filter to only show landing page create activities
     if (filterLandingPageOnly) {
-      return query.then(activities => 
-        activities.filter(activity => 
-          activity.action === 'create' && activity.entityType === 'landingPage'
+      // For basic users, only return landing page create activities
+      return db.query.activityLogs.findMany({
+        limit,
+        orderBy: desc(activityLogs.createdAt),
+        with: {
+          user: true
+        },
+        where: and(
+          eq(activityLogs.action, "create"),
+          eq(activityLogs.entityType, "landingPage")
         )
-      );
+      });
+    } else {
+      // For admin users, return all activities
+      return db.query.activityLogs.findMany({
+        limit,
+        orderBy: desc(activityLogs.createdAt),
+        with: {
+          user: true
+        }
+      });
     }
-    
-    return query;
   }
   
   async getAllActivity(userRole?: string, filterLandingPageOnly = false): Promise<any[]> {
-    let query = db.query.activityLogs.findMany({
-      orderBy: desc(activityLogs.createdAt),
-      with: {
-        user: true
-      }
-    });
-    
-    // If user is basic and we need to filter to only show landing page create activities
     if (filterLandingPageOnly) {
-      return query.then(activities => 
-        activities.filter(activity => 
-          activity.action === 'create' && activity.entityType === 'landingPage'
+      // For basic users, only return landing page create activities
+      return db.query.activityLogs.findMany({
+        orderBy: desc(activityLogs.createdAt),
+        with: {
+          user: true
+        },
+        where: and(
+          eq(activityLogs.action, "create"),
+          eq(activityLogs.entityType, "landingPage")
         )
-      );
+      });
+    } else {
+      // For admin users, return all activities
+      return db.query.activityLogs.findMany({
+        orderBy: desc(activityLogs.createdAt),
+        with: {
+          user: true
+        }
+      });
     }
-    
-    return query;
   }
 
   // Stats methods
