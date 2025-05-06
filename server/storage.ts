@@ -375,8 +375,8 @@ export class DatabaseStorage implements IStorage {
     return newActivityLog;
   }
 
-  async getRecentActivity(limit = 5): Promise<any[]> {
-    const activities = await db.query.activityLogs.findMany({
+  async getRecentActivity(limit = 5, userRole?: string, filterLandingPageOnly = false): Promise<any[]> {
+    let query = db.query.activityLogs.findMany({
       limit,
       orderBy: desc(activityLogs.createdAt),
       with: {
@@ -384,7 +384,36 @@ export class DatabaseStorage implements IStorage {
       }
     });
     
-    return activities;
+    // If user is basic and we need to filter to only show landing page create activities
+    if (filterLandingPageOnly) {
+      return query.then(activities => 
+        activities.filter(activity => 
+          activity.action === 'create' && activity.entityType === 'landingPage'
+        )
+      );
+    }
+    
+    return query;
+  }
+  
+  async getAllActivity(userRole?: string, filterLandingPageOnly = false): Promise<any[]> {
+    let query = db.query.activityLogs.findMany({
+      orderBy: desc(activityLogs.createdAt),
+      with: {
+        user: true
+      }
+    });
+    
+    // If user is basic and we need to filter to only show landing page create activities
+    if (filterLandingPageOnly) {
+      return query.then(activities => 
+        activities.filter(activity => 
+          activity.action === 'create' && activity.entityType === 'landingPage'
+        )
+      );
+    }
+    
+    return query;
   }
 
   // Stats methods
