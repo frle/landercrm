@@ -1,6 +1,6 @@
 import { users, User, InsertUser, categories, Category, InsertCategory, landingPages, LandingPage, InsertLandingPage, domainChanges, DomainChange, InsertDomainChange, activityLogs, ActivityLog, InsertActivityLog } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, like, desc, asc, sql, or } from "drizzle-orm";
+import { eq, and, like, desc, asc, sql, or, isNotNull } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 
@@ -465,49 +465,76 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCategoryBreakdown(): Promise<{ categoryName: string; percentage: number }[]> {
-    // Get landing page counts by category
-    const landingPageCounts = await db
-      .select({
-        categoryId: landingPages.categoryId,
-        count: sql<number>`count(*)`,
-      })
-      .from(landingPages)
-      .groupBy(landingPages.categoryId);
+    try {
+      // Get total landing pages count first
+      const [totalCountResult] = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(landingPages);
+      
+      const totalCount = Number(totalCountResult.count);
+      
+      if (totalCount === 0) {
+        return [];
+      }
+      
+      // Get landing page counts by category - making sure to only include non-null categoryIds
+      const landingPageCounts = await db
+        .select({
+          categoryId: landingPages.categoryId,
+          count: sql<number>`count(*)`,
+        })
+        .from(landingPages)
+        .where(sql`${landingPages.categoryId} IS NOT NULL`)
+        .groupBy(landingPages.categoryId);
+        
+      if (landingPageCounts.length === 0) {
+        return [];
+      }
+      
+      // Get category names - extract valid category IDs
+      const categoryIds = landingPageCounts
+        .map(item => item.categoryId)
+        .filter(id => id !== null && id !== undefined) as number[];
     
-    // Get total landing pages count
-    const [{ count: totalCount }] = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(landingPages);
-    
-    if (totalCount === 0) {
+      if (categoryIds.length === 0) {
+        return [];
+      }
+      
+      // Fetch categories for the IDs we have
+      let categoryList: any[] = [];
+      
+      // Fetch categories by id individually to avoid SQL array issues
+      categoryList = await Promise.all(
+        categoryIds.map(async (id) => {
+          const [category] = await db
+            .select()
+            .from(categories)
+            .where(eq(categories.id, id));
+          return category;
+        })
+      );
+      
+      // Filter out any undefined results
+      categoryList = categoryList.filter(Boolean);
+      
+      // Create a map of category IDs to names
+      const categoryMap = new Map<number, string>();
+      categoryList.forEach(category => {
+        categoryMap.set(category.id, category.name);
+      });
+      
+      // Calculate percentages
+      return landingPageCounts
+        .filter(item => item.categoryId !== null)
+        .map(item => ({
+          categoryName: categoryMap.get(item.categoryId as number) || 'Uncategorized',
+          percentage: Math.round((Number(item.count) / totalCount) * 100)
+        }))
+        .sort((a, b) => b.percentage - a.percentage);
+    } catch (error) {
+      console.error('Error in getCategoryBreakdown:', error);
       return [];
     }
-    
-    // Get category names
-    const categoryIds = landingPageCounts.map(item => item.categoryId).filter(Boolean) as number[];
-    
-    if (categoryIds.length === 0) {
-      return [];
-    }
-    
-    const categoryList = await db
-      .select()
-      .from(categories)
-      .where(sql`${categories.id} IN (${categoryIds.join(',')})`);
-    
-    const categoryMap = new Map<number, string>();
-    categoryList.forEach(category => {
-      categoryMap.set(category.id, category.name);
-    });
-    
-    // Calculate percentages
-    return landingPageCounts
-      .filter(item => item.categoryId !== null)
-      .map(item => ({
-        categoryName: categoryMap.get(item.categoryId as number) || 'Uncategorized',
-        percentage: Math.round((item.count / totalCount) * 100)
-      }))
-      .sort((a, b) => b.percentage - a.percentage);
   }
 }
 
