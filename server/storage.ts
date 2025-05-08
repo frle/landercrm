@@ -493,7 +493,7 @@ export class DatabaseStorage implements IStorage {
     const categoryList = await db
       .select()
       .from(categories)
-      .where(sql`${categories.id} IN (${categoryIds.join(',')})`);
+      .where(sql`${categories.id} = ANY(${categoryIds})`);
     
     const categoryMap = new Map<number, string>();
     categoryList.forEach(category => {
