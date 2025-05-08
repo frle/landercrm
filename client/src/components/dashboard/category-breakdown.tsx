@@ -11,6 +11,11 @@ export function CategoryBreakdown() {
   // Fetch category breakdown data
   const { data: categories, isLoading } = useQuery<CategoryBreakdown[]>({
     queryKey: ["/api/dashboard/category-breakdown"],
+    queryFn: async () => {
+      const response = await fetch("/api/dashboard/category-breakdown");
+      if (!response.ok) throw new Error("Failed to fetch category breakdown");
+      return response.json();
+    }
   });
 
   // Define colors for progress bars in a repeating pattern
